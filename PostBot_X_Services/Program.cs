@@ -1,13 +1,17 @@
+using Microsoft.Extensions.Options;
 using PostBot_X_Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+builder.Services.Configure<OpenAISettings>(builder.Configuration.GetSection("OpenAI"));
 builder.Services.AddControllers();
 // Add the ChatGPT service
-builder.Services.AddSingleton(sp => new ChatGPTService("your-openai-api-key"));
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddSingleton<ChatGPTService>(sp =>
+{
+    var options = sp.GetRequiredService<IOptions<OpenAISettings>>().Value;
+    return new ChatGPTService(options.ApiKey);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
