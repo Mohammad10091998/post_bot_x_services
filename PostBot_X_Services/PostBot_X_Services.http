@@ -1,0 +1,6 @@
+@PostBot_X_Services_HostAddress = http://localhost:5290
+
+GET {{PostBot_X_Services_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
