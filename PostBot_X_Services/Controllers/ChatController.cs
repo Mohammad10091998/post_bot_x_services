@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Services.Interfaces;
 
 namespace PostBot_X_Services.Controllers
 {
@@ -7,9 +8,9 @@ namespace PostBot_X_Services.Controllers
     [ApiController]
     public class ChatController : ControllerBase
     {
-        private readonly ChatGPTService _chatGPTService;
+        private readonly IChatGPTService _chatGPTService;
 
-        public ChatController(ChatGPTService chatGPTService)
+        public ChatController(IChatGPTService chatGPTService)
         {
             _chatGPTService = chatGPTService;
         }
@@ -19,21 +20,7 @@ namespace PostBot_X_Services.Controllers
         {
             try
             {
-                var response = await _chatGPTService.GetResponseAsync(prompt);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-        }
-        [HttpPost("openai")]
-        public async Task<IActionResult> AskOpen([FromBody] string prompt)
-        {
-            try
-            {
-                var response = await _chatGPTService.GetResponseAsync(prompt);
+                var response = await _chatGPTService.GeneratePayloadAsync(prompt);
                 return Ok(response);
             }
             catch (Exception ex)

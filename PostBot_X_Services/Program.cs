@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Options;
-using PostBot_X_Services;
+using Services.Interfaces;
+using Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-// Add the ChatGPT service
-builder.Services.AddSingleton<ChatGPTService>();
+// Add the Services
+builder.Services.AddSingleton<IChatGPTService, ChatGPTService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
