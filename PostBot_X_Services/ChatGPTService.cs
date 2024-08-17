@@ -1,27 +1,20 @@
-﻿using OpenAI_API.Completions;
-using OpenAI_API;
+﻿using OpenAI.Chat;
 
 namespace PostBot_X_Services
 {
     public class ChatGPTService
     {
-        private readonly OpenAIAPI _openAIAPI;
-
-        public ChatGPTService(string apiKey)
+        private readonly ChatClient _chatClient;
+        public ChatGPTService()
         {
-            _openAIAPI = new OpenAIAPI(apiKey);
+            _chatClient = new(model: "gpt-3.5-turbo", Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
         }
 
-        public async Task<string> GetResponseAsync(string prompt)
+        public async Task<ChatCompletion> GetResponseAsync(string prompt)
         {
-            var completionRequest = new CompletionRequest
-            {
-                Prompt = prompt,
-                MaxTokens = 150
-            };
+            ChatCompletion completion = _chatClient.CompleteChat(prompt);
 
-            var result = await _openAIAPI.Completions.CreateCompletionAsync(completionRequest);
-            return result.Completions[0].Text;
+            return completion;
         }
     }
 }
