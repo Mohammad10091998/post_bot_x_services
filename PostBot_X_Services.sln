@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostBot_X_Services", "PostBot_X_Services\PostBot_X_Services.csproj", "{636FBF52-E479-4A1D-9207-22D067717CAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostBot_X_Services", "PostBot_X_Services\PostBot_X_Services.csproj", "{636FBF52-E479-4A1D-9207-22D067717CAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{7B71A285-C696-49D7-A4C4-657B85C8D5F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{91DED56D-19BC-49F1-A619-36321E42E806}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{636FBF52-E479-4A1D-9207-22D067717CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{636FBF52-E479-4A1D-9207-22D067717CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{636FBF52-E479-4A1D-9207-22D067717CAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B71A285-C696-49D7-A4C4-657B85C8D5F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B71A285-C696-49D7-A4C4-657B85C8D5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B71A285-C696-49D7-A4C4-657B85C8D5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B71A285-C696-49D7-A4C4-657B85C8D5F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91DED56D-19BC-49F1-A619-36321E42E806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91DED56D-19BC-49F1-A619-36321E42E806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91DED56D-19BC-49F1-A619-36321E42E806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91DED56D-19BC-49F1-A619-36321E42E806}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
