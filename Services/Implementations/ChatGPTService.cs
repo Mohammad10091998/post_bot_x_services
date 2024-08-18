@@ -19,13 +19,14 @@ namespace Services.Implementations
             _client = new(apiKey);
             _chatClient = new(model: "gpt-3.5-turbo", apiKey);
         }
-        public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string configuredPayload, int numberOfPayloads)
+        public async Task<ChatCompletion> GeneratePayloadsAsync(string configuredPayload)
         {
-            var prompt = $"Based on the configured payload {configuredPayload}, generate {numberOfPayloads} different payloads with a small description for each.";
+            var prompt = $"Given the following configured payload:\n{configuredPayload}\nPlease generate several diverse payloads, including both positive and negative scenarios. For each generated payload, provide a small description explaining what the payload is testing (e.g., edge cases, invalid data, typical use cases, etc.). Ensure that the payloads cover a wide range of scenarios to thoroughly test the API.";
+
             var response = await _chatClient.CompleteChatAsync(prompt);
 
-            var payloads = ParsePayloads("");
-            return payloads;
+            
+            return response;
         }
         public async Task<ChatCompletion> GeneratePayloadAsync(string prompt)
         {

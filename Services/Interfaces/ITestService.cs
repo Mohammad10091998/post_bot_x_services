@@ -1,7 +1,10 @@
-﻿namespace Services.Interfaces
+﻿using Models;
+using OpenAI.Chat;
+
+namespace Services.Interfaces
 {
-    internal interface ITestService
+    public interface ITestService
     {
-        Task RunTestAsync(string request);
+        Task<ChatCompletion> RunTestAsync(TestModel model);
     }
 }
