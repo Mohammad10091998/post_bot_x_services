@@ -4,9 +4,12 @@ using Services.Implementations;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+// Register HttpClientService with HttpClient dependency
+builder.Services.AddHttpClient<IHttpClientService, HttpClientService>();
 // Register Services
 builder.Services.AddSingleton<IChatGPTService, ChatGPTService>();
-builder.Services.AddSingleton<ITestService, TestService>();
+builder.Services.AddScoped<ITestService, TestService>();
+builder.Services.AddTransient<IHelperService, HelperService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

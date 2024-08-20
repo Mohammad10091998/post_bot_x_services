@@ -1,6 +1,6 @@
 ﻿namespace Models
 {
-    internal class TestSuiteResultModel
+    public class TestSuiteResultModel
     {
         public string ApiUrl { get; set; } 
         public string ApiType { get; set; } 
