@@ -1,5 +1,6 @@
 ﻿using Models;
 using Services.Interfaces;
+using System.Net;
 
 namespace Services.Implementations
 {
@@ -13,7 +14,7 @@ namespace Services.Implementations
         public async Task<(int StatusCode, string ResponseContent, bool IsSuccessful, string? ErrorAnalysis)> MakeApiCallAsync(
             string url,
             string? payload,
-            List<KeyValue> headerPairs,
+            List<HeaderKeyValue> headerPairs,
             string httpMethod)
         {
             try
@@ -37,11 +38,15 @@ namespace Services.Implementations
             }
             catch (HttpRequestException ex)
             {
-                return (0, ex.Message, false, "Error occurred during API call.");
+                return ((int)HttpStatusCode.ServiceUnavailable, ex.Message, false, "Network-related error occurred during API call.");
+            }
+            catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
+            {
+                return ((int)HttpStatusCode.RequestTimeout, ex.Message, false, "Request timed out.");
             }
             catch (Exception ex)
             {
-                return (0, ex.Message, false, "Unexpected error occurred.");
+                return ((int)HttpStatusCode.InternalServerError, ex.Message, false, "Unexpected error occurred.");
             }
         }
     }

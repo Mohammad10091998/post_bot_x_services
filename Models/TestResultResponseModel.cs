@@ -1,9 +1,9 @@
 ﻿namespace Models
 {
-    public class TestResultModel
+    public class TestResultResponseModel
     {
-        public string Payload { get; set; } 
-        public string? PayloadDescription { get; set; } 
+        public string TestData { get; set; } 
+        public string? Description { get; set; } 
         public int StatusCode { get; set; } 
         public string ResponseContent { get; set; } 
         public bool IsSuccessful { get; set; } 

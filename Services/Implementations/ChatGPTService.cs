@@ -1,4 +1,5 @@
-﻿using OpenAI.Chat;
+﻿using Models;
+using OpenAI.Chat;
 using Services.Interfaces;
 
 namespace Services.Implementations
@@ -18,9 +19,17 @@ namespace Services.Implementations
             _chatClient = new(model: "gpt-3.5-turbo", apiKey);
             _helperService = helperService;
         }
+
+        public async Task<string> AnalyzeErrorAsync(string httpResponse)
+        {
+            string prompt = $"Analyze this HTTP error response in one line: {httpResponse}";
+            var response = await _chatClient.CompleteChatAsync(prompt);
+            var errorAnalysis = response.Value.Content[0].Text;
+            return errorAnalysis;
+        }
+
         public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string configuredPayload)
         {
-
             string prompt = $@"
                 Given this configured payload:
 
@@ -51,6 +60,18 @@ namespace Services.Implementations
             //var payloads = _helperService.ParsePayloads(Text);
             return payloads;
         }
-       
+        public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<KeyValue> queryParameters)
+        {
+            string baseUrlWithQueryParams = _helperService.GenerateFullURL(baseURL, queryParameters);
+            string prompt = $"Given the following URL with query parameters: {baseUrlWithQueryParams}, " +
+                $"generate additional URLs by varying the values of the query parameters. " +
+                $"Please ensure that the new URLs cover positive, negative, and edge case scenarios for each parameter." +
+                $"\r\n\r\nFormat the response as follows:\r\n\r\nURL: generated URL\r\nDescription: Brief description of the test scenario covered by this URL." +
+                $"\r\nGenerate at least 5 different URLs with their descriptions.";
+            var response = await _chatClient.CompleteChatAsync(prompt);
+            var urlsWithDescription = _helperService.ParseURLs(response.Value.Content[0].Text);
+            return urlsWithDescription;
+        }
+
     }
 }
