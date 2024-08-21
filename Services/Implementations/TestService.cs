@@ -1,5 +1,6 @@
 ﻿using Models;
 using Services.Interfaces;
+using System.Net;
 
 namespace Services.Implementations
 {
@@ -7,16 +8,18 @@ namespace Services.Implementations
     {
         private readonly IChatGPTService _chatGPTService;
         private readonly IHttpClientService _httpClientService;
-        public TestService(IChatGPTService chatGPTService, IHttpClientService httpClientService)
+        private readonly IHelperService _helperService;
+        public TestService(IChatGPTService chatGPTService, IHttpClientService httpClientService, IHelperService helperService)
         {
             _chatGPTService = chatGPTService;
             _httpClientService = httpClientService;
+            _helperService = helperService;
         }
-        public async Task<TestSuiteResultModel> RunTestAsync(TestModel model)
+        public async Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(TestModel model)
         {
+            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync(model.Payload.First());
 
-            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync(model.Payload);
-            var testResults = new List<TestResultModel>();
+            var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel
             {
                 ApiUrl = model.Url,
@@ -25,13 +28,109 @@ namespace Services.Implementations
             foreach (var (payload, description) in payloadsWithDescriptions)
             {
                 var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.HeaderPairs, model.ApiType);
-                testResults.Add(new TestResultModel
+                string errorAnalysis = string.Empty;
+                if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
                 {
-                    Payload = payload,
-                    PayloadDescription = description,
+                    errorAnalysis = await _chatGPTService.AnalyzeErrorAsync(result.ResponseContent);
+                }
+                testResults.Add(new TestResultResponseModel
+                {
+                    TestData = payload,
+                    Description = description,
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
-                    IsSuccessful = result.IsSuccessful
+                    IsSuccessful = result.IsSuccessful,
+                    ErrorAnalysis = errorAnalysis
+                });
+            }
+            testSuiteResult.TestResults = testResults;
+            return testSuiteResult;
+        }
+        public async Task<TestSuiteResultModel> RunManualWriteTestsAsync(TestModel model)
+        {  
+            var testResults = new List<TestResultResponseModel>();
+            var testSuiteResult = new TestSuiteResultModel
+            {
+                ApiUrl = model.Url,
+                ApiType = model.ApiType
+            };
+            foreach (var payload in model.Payload)
+            {
+                var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.HeaderPairs, model.ApiType);
+                string errorAnalysis = string.Empty;
+                if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
+                {
+                    errorAnalysis = await _chatGPTService.AnalyzeErrorAsync(result.ResponseContent);
+                }
+                testResults.Add(new TestResultResponseModel
+                {
+                    TestData = payload,
+                    Description = "",
+                    StatusCode = result.StatusCode,
+                    ResponseContent = result.ResponseContent,
+                    IsSuccessful = result.IsSuccessful,
+                    ErrorAnalysis = errorAnalysis
+                });
+            }
+            testSuiteResult.TestResults = testResults;
+            return testSuiteResult;
+        }
+        public async Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(TestModel model)
+        {
+            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync(model.Payload.First());
+
+            var testResults = new List<TestResultResponseModel>();
+            var testSuiteResult = new TestSuiteResultModel
+            {
+                ApiUrl = model.Url,
+                ApiType = model.ApiType
+            };
+            foreach (var (payload, description) in payloadsWithDescriptions)
+            {
+                var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.HeaderPairs, model.ApiType);
+                string errorAnalysis = string.Empty;
+                if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
+                {
+                    errorAnalysis = await _chatGPTService.AnalyzeErrorAsync(result.ResponseContent);
+                }
+                testResults.Add(new TestResultResponseModel
+                {
+                    TestData = payload,
+                    Description = description,
+                    StatusCode = result.StatusCode,
+                    ResponseContent = result.ResponseContent,
+                    IsSuccessful = result.IsSuccessful,
+                    ErrorAnalysis = errorAnalysis
+                });
+            }
+            testSuiteResult.TestResults = testResults;
+            return testSuiteResult;
+        }
+        public async Task<TestSuiteResultModel> RunManualReadTestsAsync(TestModel model)
+        {
+            var testResults = new List<TestResultResponseModel>();
+            var testSuiteResult = new TestSuiteResultModel
+            {
+                ApiUrl = model.Url,
+                ApiType = model.ApiType
+            };
+            var urlsWithDescription = _helperService.GenerateTestUrls(model.Url, model.QueryParameters);
+            foreach (var (url, description) in urlsWithDescription)
+            {
+                var result = await _httpClientService.MakeApiCallAsync(url, model.Payload.FirstOrDefault(), model.HeaderPairs, model.ApiType);
+                string errorAnalysis = string.Empty;
+                if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
+                {
+                    errorAnalysis = await _chatGPTService.AnalyzeErrorAsync(result.ResponseContent);
+                }
+                testResults.Add(new TestResultResponseModel
+                {
+                    TestData = url,
+                    Description = description,
+                    StatusCode = result.StatusCode,
+                    ResponseContent = result.ResponseContent,
+                    IsSuccessful = result.IsSuccessful,
+                    ErrorAnalysis = errorAnalysis
                 });
             }
             testSuiteResult.TestResults = testResults;

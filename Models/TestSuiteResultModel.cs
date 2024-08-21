@@ -4,11 +4,11 @@
     {
         public string ApiUrl { get; set; } 
         public string ApiType { get; set; } 
-        public List<TestResultModel> TestResults { get; set; } 
+        public List<TestResultResponseModel> TestResults { get; set; } 
 
         public TestSuiteResultModel()
         {
-            TestResults = new List<TestResultModel>();
+            TestResults = new List<TestResultResponseModel>();
         }
     }
 }

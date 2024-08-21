@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Models;
-using OpenAI.Chat;
-using OpenAI;
 using Services.Interfaces;
-using System.ClientModel;
 
 namespace PostBot_X_Services.Controllers
 {
@@ -19,12 +15,12 @@ namespace PostBot_X_Services.Controllers
             _testService = testService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RunTest(TestModel model)
+        [HttpPost("automated/write")]
+        public async Task<IActionResult> RunAutomatedWriteTest(TestModel model)
         {
             try
             {
-                var response = await _testService.RunTestAsync(model);
+                var response = await _testService.RunAutomatedWriteTestsAsync(model);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -32,36 +28,43 @@ namespace PostBot_X_Services.Controllers
                 throw;
             }
         }
-
-        [HttpPost("stream-chat")]
-        public async IAsyncEnumerable<string> StreamChat(TestModel model)
+        [HttpPost("automated/read")]
+        public async Task<IActionResult> RunAutomatedReadTestsAsync(TestModel model)
         {
-            var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-            ChatClient _chatClient = new(model: "gpt-3.5-turbo", apiKey); ;
-            var prompt = $"Given the following configured payload:\n{model.Payload}\nPlease generate several diverse payloads, including both positive and negative scenarios. For each generated payload, provide a small description explaining what the payload is testing (e.g., edge cases, invalid data, typical use cases, etc.). Ensure that the payloads cover a wide range of scenarios to thoroughly test the API.";
-            AsyncCollectionResult<StreamingChatCompletionUpdate> updates = _chatClient.CompleteChatStreamingAsync(prompt);
-
-            Console.WriteLine($"[ASSISTANT]:");
-            await foreach (StreamingChatCompletionUpdate update in updates)
+            try
             {
-                foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
-                {
-                    Console.WriteLine(updatePart.Text);
-                    yield return updatePart.Text;
-                }
+                var response = await _testService.RunAutomatedReadTestsAsync(model);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
-        [HttpGet]
-        [Route("GetCounter")]
-        public async IAsyncEnumerable<int> GetCounter()
+        [HttpPost("manual/write")]
+        public async Task<IActionResult> RunManualWriteTestsAsync(TestModel model)
         {
-            int i = 0;
-            while (i < 100)
+            try
             {
-                await Task.Delay(500);
-                Console.WriteLine(i);
-                i++;
-                yield return i;
+                var response = await _testService.RunManualWriteTestsAsync(model);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [HttpPost("manual/read")]
+        public async Task<IActionResult> RunManualReadTestsAsync(TestModel model)
+        {
+            try
+            {
+                var response = await _testService.RunManualReadTestsAsync(model);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
     }
