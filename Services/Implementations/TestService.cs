@@ -77,7 +77,7 @@ namespace Services.Implementations
         }
         public async Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(TestModel model)
         {
-            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync(model.Payload.First());
+            var urlsWithDescriptions = await _chatGPTService.GenerateURLsAsync(model.Url, model.QueryParameters);
 
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel
@@ -85,9 +85,9 @@ namespace Services.Implementations
                 ApiUrl = model.Url,
                 ApiType = model.ApiType
             };
-            foreach (var (payload, description) in payloadsWithDescriptions)
+            foreach (var (url, description) in urlsWithDescriptions)
             {
-                var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.HeaderPairs, model.ApiType);
+                var result = await _httpClientService.MakeApiCallAsync(url, model.Payload.FirstOrDefault(), model.HeaderPairs, model.ApiType);
                 string errorAnalysis = string.Empty;
                 if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
                 {
@@ -95,7 +95,7 @@ namespace Services.Implementations
                 }
                 testResults.Add(new TestResultResponseModel
                 {
-                    TestData = payload,
+                    TestData = url,
                     Description = description,
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
