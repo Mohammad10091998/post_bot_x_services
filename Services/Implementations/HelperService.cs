@@ -8,7 +8,6 @@ namespace Services.Implementations
     {
         public List<(string Payload, string Description)> ParsePayloads(string responseText)
         {
-            // Define regex pattern to match each payload and its description
             var regex = new Regex(@"\d+\.\s*Payload:\s*(\{.+?\})\s*Description:\s*(.+?)(?=\d+\.\s*Payload:|\Z)", RegexOptions.Singleline);
             var matches = regex.Matches(responseText);
 
@@ -16,7 +15,6 @@ namespace Services.Implementations
 
             foreach (Match match in matches)
             {
-                // Extract payload and description from each match
                 var payload = match.Groups[1].Value.Trim();
                 var description = match.Groups[2].Value.Trim();
                 payloads.Add((payload, description));
@@ -76,8 +74,7 @@ namespace Services.Implementations
         {
             var urlsWithDescription = new List<(string URL, string Description)>();
 
-            // Regex to match the URL and description
-            var regex = new Regex(@"\d+\.\s*URL:\s*(\S+)\s*Description:\s*(.+?)(?=\d+\.|\Z)", RegexOptions.Singleline);
+            var regex = new Regex(@"URL:\s*(\S+)\s*Description:\s*(.+?)(?=(URL:|\Z))", RegexOptions.Singleline);
             var matches = regex.Matches(input);
 
             foreach (Match match in matches)
@@ -89,6 +86,5 @@ namespace Services.Implementations
 
             return urlsWithDescription;
         }
-
     }
 }
