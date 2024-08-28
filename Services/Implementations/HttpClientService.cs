@@ -10,11 +10,12 @@ namespace Services.Implementations
         public HttpClientService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            _httpClient.Timeout = Timeout.InfiniteTimeSpan;
         }
         public async Task<(int StatusCode, string ResponseContent, bool IsSuccessful, string? ErrorAnalysis)> MakeApiCallAsync(
             string url,
             string? payload,
-            List<HeaderKeyValue> headerPairs,
+            List<Header> headers,
             string httpMethod)
         {
             try
@@ -26,7 +27,7 @@ namespace Services.Implementations
                     request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
                 }
 
-                foreach (var header in headerPairs)
+                foreach (var header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
