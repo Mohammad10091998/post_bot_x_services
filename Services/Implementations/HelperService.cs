@@ -22,7 +22,7 @@ namespace Services.Implementations
 
             return payloads;
         }
-        public List<(string URL, string Description)> GenerateTestUrls(string baseUrl, List<KeyValue> queryParameters)
+        public List<(string URL, string Description)> GenerateTestUrls(string baseUrl, List<Params> queryParameters)
         {
             var generatedUrlsWithDescription = new List<(string Payload, string Description)>();
 
@@ -48,7 +48,7 @@ namespace Services.Implementations
 
             return generatedUrlsWithDescription;
         }
-        public string GenerateFullURL(string baseUrl, List<KeyValue> queryParameters)
+        public string GenerateFullURL(string baseUrl, List<Params> queryParameters)
         {
             string baseUrlWithQueryParams = baseUrl;
             foreach (var param in queryParameters)

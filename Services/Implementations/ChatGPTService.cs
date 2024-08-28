@@ -60,7 +60,7 @@ namespace Services.Implementations
             //var payloads = _helperService.ParsePayloads(Text);
             return payloads;
         }
-        public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<KeyValue> queryParameters)
+        public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<Params> queryParameters)
         {
             string baseUrlWithQueryParams = _helperService.GenerateFullURL(baseURL, queryParameters);
             string prompt = $"Given the following URL with query parameters: {baseUrlWithQueryParams}, " +
