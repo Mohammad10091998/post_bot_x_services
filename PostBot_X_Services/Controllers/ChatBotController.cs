@@ -5,10 +5,10 @@ namespace PostBot_X_Services.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ChatController : ControllerBase
+    public class ChatBotController : ControllerBase
     {
         private readonly IChatBotService _chatBotService;
-        public ChatController(IChatBotService chatBotService)
+        public ChatBotController(IChatBotService chatBotService)
         {
             _chatBotService = chatBotService;
         }
