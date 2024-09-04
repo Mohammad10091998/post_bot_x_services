@@ -1,6 +1,16 @@
 ﻿using Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using OpenAI.Chat;
 using Services.Interfaces;
+using System;
+using System.ClientModel;
+using System.Collections;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Text;
+using System.Xml.Linq;
 
 namespace Services.Implementations
 {
@@ -20,45 +30,90 @@ namespace Services.Implementations
             _helperService = helperService;
         }
 
-        public async Task<string> AnalyzeErrorAsync(string httpResponse)
+        public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string originalPayload, string configuredPayload, int numberOfFields)
         {
-            string prompt = $"Analyze this HTTP error response in one line: {httpResponse}";
-            var response = await _chatClient.CompleteChatAsync(prompt);
-            var errorAnalysis = response.Value.Content[0].Text;
-            return errorAnalysis;
-        }
+            int numberOfPayloads = 2;  // Number of payloads to generate for each key; adjust as needed.
+            List<(string Payload, string Description)> allPayloads = new List<(string Payload, string Description)>();
+            var converter = new ExpandoObjectConverter();
+            dynamic configureJson = JsonConvert.DeserializeObject<ExpandoObject>(configuredPayload, converter);
+            dynamic originalJson = JsonConvert.DeserializeObject<ExpandoObject>(originalPayload, converter);
+            var dictionary = (IDictionary<string, object>)configureJson;
+            List<string> keysList = new();
+            TraverseExpandoObject(dictionary, keysList);
 
-        public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string configuredPayload)
-        {
-            string prompt = $@"
+            foreach (var key in keysList)
+            {
+                string prompt = $@"
                 Given this configured payload:
 
                 {configuredPayload}
 
                 Each field includes:
                 - Datatype: Field type (e.g., string, int).
-                - Behavior: 'Fix' (value stays constant) or 'Random' (value changes similarly unless being tested).
+                - Behavior: 'Fix' (value stays constant as) or 'Random' (value changes similarly unless being tested).
                 - Example Value: A sample value for the field.
-                - Validation Rules: Optional constraints on field values.
+                - Validation Rules: It is constraint on the fields and against which we need to test these field.
+                 
+               
 
-                Generate diverse payloads covering positive, negative, and edge cases. Use this format:
+                **Instructions**
+                -Generate payloads to test the {key} field only, covering all negative scenarios. Generate payloads as minimum as possible to cover all edge cases.
+                -Include all the fields and set their value according to their behaviour.
 
+                **Strictly follow this format**
                 1. Payload:
                 {{
                     ""property1"": value,
                     ""property2"": value,
                     ...
                 }}
-                Description: Very small description what this payload tests.
-
-                Ensure clear separation between each payload and description.
             ";
 
-            var response = await _chatClient.CompleteChatAsync(prompt);
-            //var Text = "1. Payload:\r\n{\r\n    \"orderId\": 12345,\r\n    \"customer\": {\r\n        \"customerId\": \"C001\",\r\n        \"name\": \"John Doe\",\r\n        \"email\": \"john.doe@example.com\",\r\n        \"address\": {\r\n            \"street\": \"123 Elm Street\",\r\n            \"city\": \"Springfield\",\r\n            \"state\": \"IL\",\r\n            \"zipCode\": 62704\r\n        }\r\n    },\r\n    \"items\": [\r\n        {\r\n            \"itemId\": \"I001\",\r\n            \"productName\": \"Widget A\",\r\n            \"quantity\": 2,\r\n            \"price\": 19.99\r\n        }\r\n    ]\r\n}\r\nDescription: Basic payload with all fields filled with valid values.\r\n\r\n2. Payload:\r\n{\r\n    \"orderId\": -1,\r\n    \"customer\": {\r\n        \"customerId\": \"Invalid\",\r\n        \"name\": \"John Doe\",\r\n        \"email\": \"john.doe@example.com\",\r\n        \"address\": {\r\n            \"street\": \"123 Elm Street\",\r\n            \"city\": \"Springfield\",\r\n            \"state\": \"IL\",\r\n            \"zipCode\": 62704\r\n        }\r\n    },\r\n    \"items\": [\r\n        {\r\n            \"itemId\": \"Invalid\",\r\n            \"productName\": \"Widget B\",\r\n            \"quantity\": 0,\r\n            \"price\": -1.99\r\n        }\r\n    ]\r\n}\r\nDescription: Payload with negative values for orderId, quantity, and price, and invalid values for customerId and itemId.\r\n\r\n3. Payload:\r\n{\r\n    \"orderId\": 0,\r\n    \"customer\": {\r\n        \"customerId\": \"C0\",\r\n        \"name\": \"John Doe\",\r\n        \"email\": \"john.doe@example.com\",\r\n        \"address\": {\r\n            \"street\": \"12\",\r\n            \"city\": \"Springfield\",\r\n            \"state\": \"IL\",\r\n            \"zipCode\": 123456\r\n        }\r\n    },\r\n    \"items\": []\r\n}\r\nDescription: Payload testing edge cases for orderId, customerId, address street length, and zipCode.\r\n\r\n4. Payload:\r\n{\r\n    \"orderId\": 12345,\r\n    \"customer\": {\r\n        \"customerId\": \"C001\",\r\n        \"name\": \"\",\r\n        \"email\": \"invalid_email\",\r\n        \"address\": {\r\n            \"street\": \"123 Elm Street\",\r\n            \"city\": \"Springfield\",\r\n            \"state\": \"IL\",\r\n            \"zipCode\": 62704\r\n        }\r\n    },\r\n    \"items\": [\r\n        {\r\n            \"itemId\": \"I001\",\r\n            \"productName\": null,\r\n            \"quantity\": 1000,\r\n            \"price\": 0\r\n        }\r\n    ]\r\n}\r\nDescription: Payload with empty name, invalid email address, null productName, maximum quantity, and price equal to 0.";
-            var payloads = _helperService.ParsePayloads(response.Value.Content[0].Text);
-            //var payloads = _helperService.ParsePayloads(Text);
-            return payloads;
+                // Call ChatGPT to generate payloads for the current key
+                var response = await _chatClient.CompleteChatAsync(prompt);
+
+                // Parse the response to extract payloads
+                var partialPayloads = _helperService.ParsePayloads(response.Value.Content[0].Text);
+
+                allPayloads.AddRange(partialPayloads);
+            }
+
+            return allPayloads;
+        }
+
+        static void TraverseExpandoObject(IDictionary<string, object> dictionary, List<string> keysList, string parentKey = "")
+        {
+            foreach (var kvp in dictionary)
+            {
+                string currentKey = string.IsNullOrEmpty(parentKey) ? kvp.Key : $"{parentKey}.{kvp.Key}";
+
+                if (kvp.Value is IDictionary<string, object> nestedDict)
+                {
+                    // If the value is a nested ExpandoObject, recurse
+                    TraverseExpandoObject(nestedDict, keysList, currentKey);
+                }
+                else if (kvp.Value is IList nestedList)
+                {
+                    // If the value is a list or array, iterate through its items
+                    for (int i = 0; i < nestedList.Count; i++)
+                    {
+                        if (nestedList[i] is IDictionary<string, object> listDict)
+                        {
+                            TraverseExpandoObject(listDict, keysList , $"{currentKey}[{i}]");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Key: {currentKey}[{i}], Value: {nestedList[i]}");
+                        }
+                    }
+                }
+                else
+                {
+                    // If the value is a primitive type, just print it
+                    keysList.Add(kvp.Key);
+                    Console.WriteLine($"Key: {currentKey}, Value: {kvp.Value}");
+                }
+            }
         }
         public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<Params> queryParameters)
         {
@@ -72,6 +127,12 @@ namespace Services.Implementations
             var urlsWithDescription = _helperService.ParseURLs(response.Value.Content[0].Text);
             return urlsWithDescription;
         }
-
+        public async Task<string> AnalyzeErrorAsync(string httpResponse)
+        {
+            string prompt = $"Analyze this HTTP error response in one line: {httpResponse}";
+            var response = await _chatClient.CompleteChatAsync(prompt);
+            var errorAnalysis = response.Value.Content[0].Text;
+            return errorAnalysis;
+        }
     }
 }

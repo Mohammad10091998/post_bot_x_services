@@ -14,7 +14,7 @@ namespace PostBot_X_Services.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RunAutomatedWriteTest(string query)
+        public async Task<IActionResult> ChatBot(string query)
         {
             try
             {

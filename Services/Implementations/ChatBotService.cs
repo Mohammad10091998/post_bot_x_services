@@ -13,7 +13,7 @@ namespace Services.Implementations
             {
                 throw new InvalidOperationException("API key is not configured.");
             }
-            _chatClient = new(model: "ft:gpt-3.5-turbo-0125:personal::A1UXxUG5", apiKey);
+            _chatClient = new(model: "ft:gpt-3.5-turbo-0125:personal:postbot-x-chat:A335SCFJ", apiKey);
         }
         public async Task<string> UserQueryResolver(string query)
         {
