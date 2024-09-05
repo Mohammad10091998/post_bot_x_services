@@ -26,13 +26,12 @@ namespace Services.Implementations
             {
                 throw new InvalidOperationException("API key is not configured.");
             }
-            _chatClient = new(model: "gpt-3.5-turbo", apiKey);
+            _chatClient = new(model: "gpt-4", apiKey);
             _helperService = helperService;
         }
 
         public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string originalPayload, string configuredPayload, int numberOfFields)
         {
-            int numberOfPayloads = 2;  // Number of payloads to generate for each key; adjust as needed.
             List<(string Payload, string Description)> allPayloads = new List<(string Payload, string Description)>();
             var converter = new ExpandoObjectConverter();
             dynamic configureJson = JsonConvert.DeserializeObject<ExpandoObject>(configuredPayload, converter);
@@ -44,48 +43,65 @@ namespace Services.Implementations
             foreach (var key in keysList)
             {
                 string prompt = $@"
-                Given this configured payload:
+                Given the configured payload:
 
+                ```json
                 {configuredPayload}
+                ```
 
-                Each field includes:
-                - Datatype: Field type (e.g., string, int).
-                - Behavior: 'Fix' (value stays constant as) or 'Random' (value changes similarly unless being tested).
-                - Example Value: A sample value for the field.
-                - Validation Rules: It is constraint on the fields and against which we need to test these field.
-                 
-               
+                Each field in the payload has the following properties:
+                - **Datatype**: Type of the field (e.g., string, int).
+                - **Behavior**: 'Fix' (value remains constant) or 'Unique' (value must be unique across different payloads).
+                - **Example Value**: Sample value for the field that should be used as a reference for uniqueness.
+                - **Validation Rules**: Constraints that define valid values for the field.
 
-                **Instructions**
-                -Generate payloads to test the {key} field only, covering all negative scenarios. Generate payloads as minimum as possible to cover all edge cases.
-                -Include all the fields and set their value according to their behaviour.
+                **Objective**:
+                Generate up to 3 payloads to test the `{key}` field only. Generate values for this field that violate its Validation Rules. Do **not** test any other field. **Ensure all 'Unique' fields have distinct random values for each payload.**
 
-                **Strictly follow this format**
-                1. Payload:
+                **Instructions**:
+
+                1. **For 'Fix' Behavior Fields**:
+                   - Use the provided Example Value exactly as given for each payload. **Do not modify** this value, no matter what.
+
+                2. **For 'Unique' Behavior Fields**:
+                   - **Critical**: It is very important that values are always distinct, very random, and comply with the Validation Rules for fields marked as 'Unique,' unless that field is specifically being tested. If there are no rules, use appropriate random values.
+    
+                3. **Validation Rules**:
+                   - Focus only on testing the `{key}` field according to its validation rules (if provided). Create payloads that cover positive, negative, and edge cases for the `{key}` field. If this field does not have any validation rules, then generate values for it according to your discretion. **Do not modify any other field** unless necessary.
+
+               **Key Rules**:
+                    - **All fields must be included** in every payload.
+                    - **No comments, extra information, or changes in format are allowed**.
+
+                **Strict Output Format**:
+                Generate payloads only in plain text format. Adhere strictly to the following format for each payload:
+
+                ```json
                 {{
                     ""property1"": value,
                     ""property2"": value,
                     ...
                 }}
-            ";
+                ```
+                ";
 
                 // Call ChatGPT to generate payloads for the current key
                 var response = await _chatClient.CompleteChatAsync(prompt);
 
-                // Parse the response to extract payloads
+                // Validate and parse the response to extract payloads
                 var partialPayloads = _helperService.ParsePayloads(response.Value.Content[0].Text);
-
                 allPayloads.AddRange(partialPayloads);
+                
             }
 
             return allPayloads;
         }
 
-        static void TraverseExpandoObject(IDictionary<string, object> dictionary, List<string> keysList, string parentKey = "")
+        static void TraverseExpandoObject(IDictionary<string, object> dictionary, List<string> keysList, string parentKey = "parentobject")
         {
             foreach (var kvp in dictionary)
             {
-                string currentKey = string.IsNullOrEmpty(parentKey) ? kvp.Key : $"{parentKey}.{kvp.Key}";
+                string currentKey = $"{parentKey}.{kvp.Key}";
 
                 if (kvp.Value is IDictionary<string, object> nestedDict)
                 {
@@ -110,7 +126,7 @@ namespace Services.Implementations
                 else
                 {
                     // If the value is a primitive type, just print it
-                    keysList.Add(kvp.Key);
+                    keysList.Add(currentKey);
                     Console.WriteLine($"Key: {currentKey}, Value: {kvp.Value}");
                 }
             }
