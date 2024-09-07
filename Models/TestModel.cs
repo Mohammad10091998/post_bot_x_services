@@ -8,6 +8,7 @@
         public List<string> Payload { get; set; } 
         public List<Header> Headers { get; set; } 
         public List<Params> QueryParameters { get; set; }
+        public int? NumberOfFields { get; set; }
         public TestModel()
         {
             Headers = new List<Header>();

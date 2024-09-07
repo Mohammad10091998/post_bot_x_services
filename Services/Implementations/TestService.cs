@@ -17,7 +17,8 @@ namespace Services.Implementations
         }
         public async Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(TestModel model)
         {
-            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync(model.Payload.First());
+            int numOfFields = model.NumberOfFields != null ? model.NumberOfFields.Value : 10;
+            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync("",model.Payload.First(), numOfFields);
 
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();
@@ -37,7 +38,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;
@@ -62,7 +64,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;
@@ -89,7 +92,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;
@@ -115,7 +119,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;

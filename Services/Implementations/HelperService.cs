@@ -1,4 +1,6 @@
 ﻿using Models;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Services.Interfaces;
 using System.Text.RegularExpressions;
 
@@ -8,20 +10,44 @@ namespace Services.Implementations
     {
         public List<(string Payload, string Description)> ParsePayloads(string responseText)
         {
-            var regex = new Regex(@"\d+\.\s*Payload:\s*(\{.+?\})\s*Description:\s*(.+?)(?=\d+\.\s*Payload:|\Z)", RegexOptions.Singleline);
-            var matches = regex.Matches(responseText);
+            // Improved regex pattern to match JSON blocks and their descriptions
+            var regex = new Regex(
+                @"(?<=\d+\.\s*Payload:\s*)```json\s*(\{.+?\})\s*```\s*Description:\s*(.+?)(?=\d+\.\s*Payload:|\Z)",
+                RegexOptions.Singleline | RegexOptions.IgnoreCase
+            );
 
+            var matches = regex.Matches(responseText);
             var payloads = new List<(string Payload, string Description)>();
 
             foreach (Match match in matches)
             {
                 var payload = match.Groups[1].Value.Trim();
                 var description = match.Groups[2].Value.Trim();
-                payloads.Add((payload, description));
+
+                // Additional validation to ensure valid JSON
+                if (IsValidJson(payload))
+                {
+                    payloads.Add((payload, description));
+                }
             }
 
             return payloads;
         }
+
+        // Helper function to validate JSON string format
+        private bool IsValidJson(string payload)
+        {
+            try
+            {
+                var obj = JsonConvert.DeserializeObject<JObject>(payload);
+                return obj != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public List<(string URL, string Description)> GenerateTestUrls(string baseUrl, List<Params> queryParameters)
         {
             var generatedUrlsWithDescription = new List<(string Payload, string Description)>();
