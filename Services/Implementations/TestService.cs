@@ -38,7 +38,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;
@@ -63,7 +64,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;
@@ -90,7 +92,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;
@@ -116,7 +119,8 @@ namespace Services.Implementations
                     StatusCode = result.StatusCode,
                     ResponseContent = result.ResponseContent,
                     IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis
+                    ErrorAnalysis = errorAnalysis,
+                    Time = result.TimeTaken,
                 });
             }
             testSuiteResult.TestResults = testResults;

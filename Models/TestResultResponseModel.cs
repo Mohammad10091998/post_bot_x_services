@@ -8,5 +8,6 @@
         public string ResponseContent { get; set; } 
         public bool IsSuccessful { get; set; } 
         public string? ErrorAnalysis { get; set; }
+        public TimeSpan? Time { get; set; }
     }
 }
