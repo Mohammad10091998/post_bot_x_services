@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="OpenAI" Version="2.0.0-beta.8" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.5" />
   </ItemGroup>
 
   <ItemGroup>

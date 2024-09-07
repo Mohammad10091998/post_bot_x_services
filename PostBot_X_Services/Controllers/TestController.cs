@@ -16,10 +16,14 @@ namespace PostBot_X_Services.Controllers
         }
 
         [HttpPost("automated/write")]
-        public async Task<IActionResult> RunAutomatedWriteTest(TestModel model)
+        public async Task<IActionResult> RunAutomatedWriteTest(APITestRequestModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState); 
+                }
                 var response = await _testService.RunAutomatedWriteTestsAsync(model);
                 return Ok(response);
             }
@@ -29,10 +33,14 @@ namespace PostBot_X_Services.Controllers
             }
         }
         [HttpPost("automated/read")]
-        public async Task<IActionResult> RunAutomatedReadTestsAsync(TestModel model)
+        public async Task<IActionResult> RunAutomatedReadTestsAsync(APITestRequestModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState); // Automatically returns validation errors
+                }
                 var response = await _testService.RunAutomatedReadTestsAsync(model);
                 return Ok(response);
             }
@@ -42,10 +50,14 @@ namespace PostBot_X_Services.Controllers
             }
         }
         [HttpPost("manual/write")]
-        public async Task<IActionResult> RunManualWriteTestsAsync(TestModel model)
+        public async Task<IActionResult> RunManualWriteTestsAsync(APITestRequestModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState); // Automatically returns validation errors
+                }
                 var response = await _testService.RunManualWriteTestsAsync(model);
                 return Ok(response);
             }
@@ -55,10 +67,14 @@ namespace PostBot_X_Services.Controllers
             }
         }
         [HttpPost("manual/read")]
-        public async Task<IActionResult> RunManualReadTestsAsync(TestModel model)
+        public async Task<IActionResult> RunManualReadTestsAsync(APITestRequestModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState); // Automatically returns validation errors
+                }
                 var response = await _testService.RunManualReadTestsAsync(model);
                 return Ok(response);
             }
