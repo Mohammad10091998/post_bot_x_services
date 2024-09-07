@@ -65,7 +65,7 @@ namespace Services.Implementations
             // Generate URLs by replacing one query parameter's value at a time
             foreach (var param in queryParameters)
             {
-                foreach (var value in param.Values)
+                foreach (var value in param.Value)
                 {
                     var url = ReplaceQueryParam(baseUrlWithQueryParams, param.Key, value);
                     generatedUrlsWithDescription.Add((url, $"Tested Parameter: {param.Key}, Value: {value}"));
@@ -79,9 +79,9 @@ namespace Services.Implementations
             string baseUrlWithQueryParams = baseUrl;
             foreach (var param in queryParameters)
             {
-                if (param.Values.Any())
+                if (param.Value.Any())
                 {
-                    baseUrlWithQueryParams = AppendQueryParam(baseUrlWithQueryParams, param.Key, param.Values[0]);
+                    baseUrlWithQueryParams = AppendQueryParam(baseUrlWithQueryParams, param.Key, param.Value[0]);
                 }
             }
             return baseUrlWithQueryParams;

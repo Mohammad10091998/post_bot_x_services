@@ -15,7 +15,7 @@ namespace Services.Implementations
             _httpClientService = httpClientService;
             _helperService = helperService;
         }
-        public async Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(TestModel model)
+        public async Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(APITestRequestModel model)
         {
             int numOfFields = model.NumberOfFields != null ? model.NumberOfFields.Value : 10;
             var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync("",model.Payload.First(), numOfFields);
@@ -45,7 +45,7 @@ namespace Services.Implementations
             testSuiteResult.TestResults = testResults;
             return testSuiteResult;
         }
-        public async Task<TestSuiteResultModel> RunManualWriteTestsAsync(TestModel model)
+        public async Task<TestSuiteResultModel> RunManualWriteTestsAsync(APITestRequestModel model)
         {  
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();
@@ -71,7 +71,7 @@ namespace Services.Implementations
             testSuiteResult.TestResults = testResults;
             return testSuiteResult;
         }
-        public async Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(TestModel model)
+        public async Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(APITestRequestModel model)
         {
             var urlsWithDescriptions = await _chatGPTService.GenerateURLsAsync(model.Url, model.QueryParameters);
 
@@ -99,7 +99,7 @@ namespace Services.Implementations
             testSuiteResult.TestResults = testResults;
             return testSuiteResult;
         }
-        public async Task<TestSuiteResultModel> RunManualReadTestsAsync(TestModel model)
+        public async Task<TestSuiteResultModel> RunManualReadTestsAsync(APITestRequestModel model)
         {
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();

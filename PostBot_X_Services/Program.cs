@@ -1,7 +1,14 @@
 using Services.Interfaces;
 using Services.Implementations;
+using PostBot_X_Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Validator
+//builder.Services.AddFluentValidationAutoValidation();
+//builder.Services.AddValidatorsFromAssemblyContaining<APITestRequestModelValidator>();
 
 builder.Services.AddControllers();
 // Register HttpClientService with HttpClient dependency
