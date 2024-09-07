@@ -74,18 +74,39 @@ namespace Services.Implementations
             return payloads;
         }
 
+
         public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<Params> queryParameters)
         {
             string baseUrlWithQueryParams = _helperService.GenerateFullURL(baseURL, queryParameters);
-            string prompt = $"Given the following URL with query parameters: {baseUrlWithQueryParams}, " +
-                $"generate additional URLs by varying the values of the query parameters. " +
-                $"Please ensure that the new URLs cover positive, negative, and edge case scenarios for each parameter." +
-                $"\r\n\r\nFormat the response as follows:\r\n\r\nURL: generated URL\r\nDescription: Brief description of the test scenario covered by this URL." +
-                $"\r\nGenerate at least 5 different URLs with their descriptions.";
+
+            string prompt = $@"
+                Given the following URL with query parameters: {baseUrlWithQueryParams}, generate additional URLs by varying the values of the query parameters. 
+                Please ensure that the new URLs cover positive, negative, and edge case scenarios for each parameter.
+
+                **Output Requirements**:
+                - Generate exactly 5 different URLs with their descriptions.
+                - **No extra information, comments, or format changes are allowed**.
+
+                **Strict Output Format**:
+                - Each URL should be followed by its description in the following format:
+                **Format**
+                URL: generated URL
+                Description: Brief description of the test scenario covered by this URL.
+
+                Example:
+                URL: https://example.com/api?param1=value1&param2=value2
+                Description: Tests valid values for all parameters.
+
+                Ensure that each URL and description is clearly separated and adhere to the format provided. Do not include any additional text, explanations, or comments.";
+
             var response = await _chatClient.CompleteChatAsync(prompt);
+
+            // Validate and parse the response to extract URLs and descriptions
             var urlsWithDescription = _helperService.ParseURLs(response.Value.Content[0].Text);
+
             return urlsWithDescription;
         }
+
         public async Task<string> AnalyzeErrorAsync(string httpResponse)
         {
             string prompt = $"Analyze this HTTP error response in one line: {httpResponse}";

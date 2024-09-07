@@ -26,14 +26,15 @@ namespace Services.Implementations
             {
                 HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(httpMethod), url);
 
-                if (payload != null)
+                if (payload != null && !string.IsNullOrEmpty(payload))
                 {
                     request.Content = new StringContent(payload, System.Text.Encoding.UTF8, "application/json");
                 }
 
                 foreach (var header in headers)
                 {
-                    request.Headers.Add(header.Key, header.Value);
+                    if (!string.IsNullOrEmpty(header.Key) && !string.IsNullOrEmpty(header.Value))
+                        request.Headers.Add(header.Key, header.Value);
                 }
 
                 stopwatch.Start(); // Start timing
