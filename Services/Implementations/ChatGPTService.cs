@@ -21,7 +21,7 @@ namespace Services.Implementations
             _helperService = helperService;
         }
 
-        public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string originalPayload, string configuredPayload, int numberOfFields)
+        public async Task<List<(string Payload, string Description)>> GeneratePayloadsAsync(string configuredPayload, CancellationToken cancellationToken)
         {
             List<(string Payload, string Description)> allPayloads = new List<(string Payload, string Description)>();
             
@@ -75,10 +75,14 @@ namespace Services.Implementations
         }
 
 
-        public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<Params> queryParameters)
+        public async Task<List<(string URL, string Description)>> GenerateURLsAsync(string baseURL, List<Params>? queryParameters, CancellationToken cancellationToken)
         {
             string baseUrlWithQueryParams = _helperService.GenerateFullURL(baseURL, queryParameters);
 
+            if (queryParameters == null || queryParameters.Count == 0)
+                return new List<(string, string)> { (baseURL, "Base URL") };
+            
+                
             string prompt = $@"
                 Given the following URL with query parameters: {baseUrlWithQueryParams}, generate additional URLs by varying the values of the query parameters. 
                 Please ensure that the new URLs cover positive, negative, and edge case scenarios for each parameter.

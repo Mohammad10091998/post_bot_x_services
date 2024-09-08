@@ -3,11 +3,11 @@
     public class APITestRequestModel
     {
         public string ApiType { get; set; }
-        public bool IsAutomated { get; set; }
+        public bool? IsAutomated { get; set; }
         public string Url { get; set; }
-        public List<string> Payload { get; set; } 
+        public List<string>? Payload { get; set; } 
         public List<Header> Headers { get; set; } 
-        public List<Params> QueryParameters { get; set; }
+        public List<Params>? QueryParameters { get; set; }
         public int? NumberOfFields { get; set; }
         public APITestRequestModel()
         {

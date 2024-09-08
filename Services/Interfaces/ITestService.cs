@@ -5,9 +5,9 @@ namespace Services.Interfaces
 {
     public interface ITestService
     {
-        Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(APITestRequestModel model);
-        Task<TestSuiteResultModel> RunManualWriteTestsAsync(APITestRequestModel model);
-        Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(APITestRequestModel model);
-        Task<TestSuiteResultModel> RunManualReadTestsAsync(APITestRequestModel model);
+        Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(APITestRequestModel model, CancellationToken cancellationToken);
+        Task<TestSuiteResultModel> RunManualWriteTestsAsync(APITestRequestModel model, CancellationToken cancellationToken);
+        Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(APITestRequestModel model, CancellationToken cancellationToken);
+        Task<TestSuiteResultModel> RunManualReadTestsAsync(APITestRequestModel model, CancellationToken cancellationToken);
     }
 }
