@@ -48,7 +48,7 @@ namespace Services.Implementations
             }
         }
 
-        public List<(string URL, string Description)> GenerateTestUrls(string baseUrl, List<Params> queryParameters)
+        public List<(string URL, string Description)> GenerateTestUrls(string baseUrl, List<Params>? queryParameters)
         {
             var generatedUrlsWithDescription = new List<(string Payload, string Description)>();
 
@@ -76,14 +76,17 @@ namespace Services.Implementations
 
             return generatedUrlsWithDescription;
         }
-        public string GenerateFullURL(string baseUrl, List<Params> queryParameters)
+        public string GenerateFullURL(string baseUrl, List<Params>? queryParameters)
         {
             string baseUrlWithQueryParams = baseUrl;
-            foreach (var param in queryParameters)
+            if(queryParameters != null && queryParameters.Any())
             {
-                if (param.Value.Any())
+                foreach (var param in queryParameters)
                 {
-                    baseUrlWithQueryParams = AppendQueryParam(baseUrlWithQueryParams, param.Key, param.Value[0]);
+                    if (param.Value.Any())
+                    {
+                        baseUrlWithQueryParams = AppendQueryParam(baseUrlWithQueryParams, param.Key, param.Value[0]);
+                    }
                 }
             }
             return baseUrlWithQueryParams;

@@ -18,7 +18,7 @@ namespace Services.Implementations
             string url,
             string? payload,
             List<Header> headers,
-            string httpMethod)
+            string httpMethod, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch(); // Initialize Stopwatch
 

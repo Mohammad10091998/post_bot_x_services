@@ -15,17 +15,21 @@ namespace Services.Implementations
             _httpClientService = httpClientService;
             _helperService = helperService;
         }
-        public async Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(APITestRequestModel model)
+        public async Task<TestSuiteResultModel> RunAutomatedWriteTestsAsync(APITestRequestModel model, CancellationToken cancellationToken)
         {
             int numOfFields = model.NumberOfFields != null ? model.NumberOfFields.Value : 10;
-            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync("",model.Payload.First(), numOfFields);
+            if(model.Payload == null)
+            {
+                throw new InvalidDataException("Configure Payload cannot be Null");
+            }
+            var payloadsWithDescriptions = await _chatGPTService.GeneratePayloadsAsync(model.Payload.First(), cancellationToken);
 
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();
             
             foreach (var (payload, description) in payloadsWithDescriptions)
             {
-                var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.Headers, model.ApiType);
+                var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.Headers, model.ApiType, cancellationToken);
                 string errorAnalysis = string.Empty;
                 if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
                 {
@@ -45,41 +49,44 @@ namespace Services.Implementations
             testSuiteResult.TestResults = testResults;
             return testSuiteResult;
         }
-        public async Task<TestSuiteResultModel> RunManualWriteTestsAsync(APITestRequestModel model)
+        public async Task<TestSuiteResultModel> RunManualWriteTestsAsync(APITestRequestModel model, CancellationToken cancellationToken)
         {  
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();
-            foreach (var payload in model.Payload)
+            if (model.Payload != null && model.Payload.Any())
             {
-                var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.Headers, model.ApiType);
-                string errorAnalysis = string.Empty;
-                if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
+                foreach (var payload in model.Payload)
                 {
-                    errorAnalysis = await _chatGPTService.AnalyzeErrorAsync(result.ResponseContent);
-                }
-                testResults.Add(new TestResultResponseModel
-                {
-                    TestData = payload,
-                    Description = "",
-                    StatusCode = result.StatusCode,
-                    ResponseContent = result.ResponseContent,
-                    IsSuccessful = result.IsSuccessful,
-                    ErrorAnalysis = errorAnalysis,
-                    Time = result.TimeTaken,
-                });
+                    var result = await _httpClientService.MakeApiCallAsync(model.Url, payload, model.Headers, model.ApiType, cancellationToken);
+                    string errorAnalysis = string.Empty;
+                    if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
+                    {
+                        errorAnalysis = await _chatGPTService.AnalyzeErrorAsync(result.ResponseContent);
+                    }
+                    testResults.Add(new TestResultResponseModel
+                    {
+                        TestData = payload,
+                        Description = "",
+                        StatusCode = result.StatusCode,
+                        ResponseContent = result.ResponseContent,
+                        IsSuccessful = result.IsSuccessful,
+                        ErrorAnalysis = errorAnalysis,
+                        Time = result.TimeTaken,
+                    });
+                } 
             }
             testSuiteResult.TestResults = testResults;
             return testSuiteResult;
         }
-        public async Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(APITestRequestModel model)
+        public async Task<TestSuiteResultModel> RunAutomatedReadTestsAsync(APITestRequestModel model, CancellationToken cancellationToken)
         {
-            var urlsWithDescriptions = await _chatGPTService.GenerateURLsAsync(model.Url, model.QueryParameters);
+            var urlsWithDescriptions = await _chatGPTService.GenerateURLsAsync(model.Url, model.QueryParameters, cancellationToken);
 
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();
             foreach (var (url, description) in urlsWithDescriptions)
             {
-                var result = await _httpClientService.MakeApiCallAsync(url, model.Payload.FirstOrDefault(), model.Headers, model.ApiType);
+                var result = await _httpClientService.MakeApiCallAsync(url, model.Payload?.FirstOrDefault(), model.Headers, model.ApiType, cancellationToken);
                 string errorAnalysis = string.Empty;
                 if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
                 {
@@ -99,14 +106,14 @@ namespace Services.Implementations
             testSuiteResult.TestResults = testResults;
             return testSuiteResult;
         }
-        public async Task<TestSuiteResultModel> RunManualReadTestsAsync(APITestRequestModel model)
+        public async Task<TestSuiteResultModel> RunManualReadTestsAsync(APITestRequestModel model, CancellationToken cancellationToken)
         {
             var testResults = new List<TestResultResponseModel>();
             var testSuiteResult = new TestSuiteResultModel();
             var urlsWithDescription = _helperService.GenerateTestUrls(model.Url, model.QueryParameters);
             foreach (var (url, description) in urlsWithDescription)
             {
-                var result = await _httpClientService.MakeApiCallAsync(url, model.Payload.FirstOrDefault(), model.Headers, model.ApiType);
+                var result = await _httpClientService.MakeApiCallAsync(url, model.Payload?.FirstOrDefault(), model.Headers, model.ApiType, cancellationToken);
                 string errorAnalysis = string.Empty;
                 if (result.StatusCode == (int)HttpStatusCode.InternalServerError)
                 {
