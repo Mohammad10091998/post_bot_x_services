@@ -107,6 +107,7 @@ namespace Services.Implementations
 
             // Validate and parse the response to extract URLs and descriptions
             var urlsWithDescription = _helperService.ParseURLs(response.Value.Content[0].Text);
+            urlsWithDescription.Add((baseUrlWithQueryParams, "Original URl provided by user"));
 
             return urlsWithDescription;
         }
