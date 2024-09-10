@@ -113,6 +113,7 @@ namespace Services.Implementations
             var response = await _chatClient.CompleteChatAsync(prompt);
             var errorAnalysis = response.Value.Content[0].Text;
             return errorAnalysis;
+            //gg
         }
     }
 }
